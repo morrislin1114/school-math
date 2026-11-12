@@ -1,0 +1,9 @@
+{
+  "name": "school-math",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/drill.test.js",
+    "start": "python3 -m http.server 8731"
+  }
+}
