@@ -53,9 +53,18 @@ npm start
 
 網址可以指定日期和單元，例如 `?date=2026-11-12&unit=linear`。`unit` 用單元代號：`intfrac`、`proportion`、`linear`、`ineq`、`system`、`poly`、`formula`、`exp`、`sci`、`surd`、`surdop`、`factor`、`rational`、`quad`、`abs`。
 
+## 參觀紀錄
+
+練習頁不顯示人數。另開一頁查看：
+
+https://morrislin1114.github.io/school-math/visits.html
+
+同一台瀏覽器只算一個人。數字放在公開計數服務，知道這個網址的人也能打開。
+
 ## 檔案
 
 - `index.html`、`css/app.css`、`js/app.js`：作答頁
+- `visits.html`：參觀人數，沒有連到練習頁
 - `js/units.js`：十五個單元的出題
 - `js/engine.js`：分數、根式、多項式，以及答案比對
 - `test/drill.test.js`：出題和核對

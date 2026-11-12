@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="color-scheme" content="light">
+  <title>參觀紀錄</title>
+  <link rel="stylesheet" href="css/app.css">
+  <style>
+    .visit-count {
+      margin: 18px 0 0;
+      font-family: var(--serif);
+      font-size: 76px;
+      line-height: 0.95;
+      letter-spacing: 0.02em;
+    }
+    .visit-label { margin: 6px 0 0; font-size: 18px; }
+    .visit-opens { margin: 28px 0 0; font-size: 22px; }
+    .visit-note { margin: 18px 0 0; color: var(--ink-soft); font-size: 14px; }
+    .visit-error { margin: 18px 0 0; color: var(--bad); }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <p class="kicker">國中數學基本功</p>
+    <h1>參觀紀錄</h1>
+    <hr class="rule">
+    <p class="visit-count" id="people">—</p>
+    <p class="visit-label">人來過</p>
+    <p class="visit-opens" id="opens"></p>
+    <p class="visit-note">同一台瀏覽器只算一個人。關掉分頁再打開，會計入一次開啟，人數不會再加。這頁沒有放在練習頁上。</p>
+    <p class="visit-error" id="error" hidden></p>
+    <div class="toolbar">
+      <button type="button" class="btn" id="reload">重新讀取</button>
+    </div>
+  </main>
+  <script type="module" src="js/stats.js"></script>
+</body>
+</html>

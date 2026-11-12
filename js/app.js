@@ -1,5 +1,6 @@
 import { checkAnswer } from "./engine.js";
 import { DIFFICULTY_LABEL, UNITS, buildSet, seedFor, unitForDate } from "./units.js";
+import { recordVisit } from "./visits.js";
 
 const STORAGE_KEY = "school-math-v1";
 const params = new URLSearchParams(location.search);
@@ -33,6 +34,7 @@ try {
   applyInitialRoute();
   renderAll();
   if (SELFTEST) runSelftest();
+  else recordVisit();
 } catch (error) {
   showFatal(error);
 }
