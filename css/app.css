@@ -221,6 +221,80 @@ button { cursor: pointer; }
   color: var(--ink-soft);
 }
 
+.ibon-note {
+  margin: 10px 0 0;
+  max-width: 46rem;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.ibon-note a,
+.ibon-status a { color: var(--seal); }
+
+.ibon-status {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.ibon-status:empty { display: none; }
+
+.ibon-status.is-error { color: var(--bad); }
+
+.ibon-root {
+  position: fixed;
+  left: -2400px;
+  top: 0;
+  width: 688px;
+  background: #fff;
+  pointer-events: none;
+}
+
+.ibon-page {
+  width: 688px;
+  box-sizing: border-box;
+  background: #fff;
+  color: var(--ink);
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.ibon-page h1 {
+  margin: 6px 0 0;
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+}
+
+.ibon-head,
+.ibon-run,
+.ibon-foot { display: flow-root; }
+
+.ibon-page .card { margin: 0; }
+
+.ibon-page .card.group-start { margin-top: 0; padding-top: 28px; }
+
+.ibon-page .stem { overflow: visible; margin: 8px 0 0; }
+
+.ibon-page .write-line { display: flex !important; margin-top: 10px; }
+
+.ibon-run {
+  margin: 0 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.ibon-foot {
+  margin: 0;
+  padding-top: 16px;
+  font-size: 12px;
+  color: #666;
+}
+
 .scoreline {
   display: flex;
   flex-wrap: wrap;
@@ -452,7 +526,7 @@ button { cursor: pointer; }
 @media print {
   body { background: white; }
   .sheet { box-shadow: none; margin: 0; max-width: none; padding: 0; }
-  .no-print, .answer-row, .feedback, .reveal, .rail, .toolbar, .scoreline, .help, .selftest, .load-note {
+  .no-print, .answer-row, .feedback, .reveal, .rail, .toolbar, .scoreline, .help, .selftest, .load-note, .ibon-root {
     display: none !important;
   }
   .write-line { display: flex; }
@@ -485,7 +559,9 @@ body.print-key .toolbar,
 body.print-blank .scoreline,
 body.print-key .scoreline,
 body.print-blank .help,
-body.print-key .help {
+body.print-key .help,
+body.print-blank .ibon-root,
+body.print-key .ibon-root {
   display: none !important;
 }
 

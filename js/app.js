@@ -3,8 +3,16 @@ import { DIFFICULTY_LABEL, UNITS, buildSet, seedFor, unitForDate } from "./units
 import { recordVisit } from "./visits.js";
 
 const STORAGE_KEY = "school-math-v1";
+const IBON_URL = "https://print.ibon.com.tw/ibonprinter";
+const PDF_PAGE_W = 688;
+const PDF_PAGE_H = 980;
+const PDF_SCALE = 2;
+const HTML2CANVAS_SRC = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+const JSPDF_SRC = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";
 const params = new URLSearchParams(location.search);
 const SELFTEST = params.get("selftest") === "1";
+let ibonBusy = false;
+let ibonUrl = "";
 
 const store = loadStore();
 const state = {
@@ -240,8 +248,29 @@ function renderMast() {
   actions.append(button("換一組", "reshuffle", "ghost"), button("全部核對", "check-all", "primary"));
   const prints = document.createElement("div");
   prints.className = "cluster";
-  prints.append(button("列印題目", "print-blank", "ghost"), button("列印解答", "print-key", "ghost"));
+  prints.append(
+    button("列印題目", "print-blank", "ghost"),
+    button("列印解答", "print-key", "ghost"),
+    button("存 PDF，到 7-11 印", "ibon-pdf", "ghost"),
+  );
   toolbar.append(dates, actions, prints);
+
+  const ibonNote = document.createElement("p");
+  ibonNote.className = "ibon-note no-print";
+  const ibonLink = document.createElement("a");
+  ibonLink.href = IBON_URL;
+  ibonLink.target = "_blank";
+  ibonLink.rel = "noopener";
+  ibonLink.textContent = "ibon 上傳頁";
+  ibonNote.append(
+    document.createTextNode("空白卷存成 PDF，並打開 "),
+    ibonLink,
+    document.createTextNode("。到 7-ELEVEN 選「列印掃描 → ibon 文件下載列印」，輸入取件編號，選 A4 黑白。編號約 72 小時內有效。"),
+  );
+  const ibonStatus = document.createElement("p");
+  ibonStatus.id = "ibon-status";
+  ibonStatus.className = "ibon-status no-print";
+  ibonStatus.setAttribute("role", "status");
 
   const help = document.createElement("p");
   help.className = "help no-print";
@@ -257,7 +286,7 @@ function renderMast() {
   streak.id = "streak";
   scoreline.append(score, streak);
 
-  mastEl.append(kicker, heading, rule, meta, blurb, mix, toolbar, help, scoreline);
+  mastEl.append(kicker, heading, rule, meta, blurb, mix, toolbar, ibonNote, ibonStatus, help, scoreline);
 }
 
 function button(label, action, kind, disabled = false) {
@@ -415,6 +444,7 @@ function onClick(event) {
   else if (action === "reveal") toggleReveal(trigger.closest(".card"));
   else if (action === "print-blank") printMode("blank");
   else if (action === "print-key") printMode("key");
+  else if (action === "ibon-pdf") saveIbonPdf(trigger);
 }
 
 function onInput(event) {
@@ -560,6 +590,271 @@ function clearPrintMode() {
   document.body.classList.remove("print-blank", "print-key");
 }
 
+function setIbonStatus(text, isError = false) {
+  const node = document.getElementById("ibon-status");
+  if (!node) return;
+  node.classList.toggle("is-error", isError);
+  node.replaceChildren(document.createTextNode(text));
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const existing = document.querySelector(`script[data-src="${src}"]`);
+    if (existing?.dataset.loaded === "1") {
+      resolve();
+      return;
+    }
+    if (existing) {
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("PDF 工具載入失敗")), { once: true });
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = src;
+    script.dataset.src = src;
+    script.onload = () => {
+      script.dataset.loaded = "1";
+      resolve();
+    };
+    script.onerror = () => {
+      script.remove();
+      reject(new Error("PDF 工具載入失敗"));
+    };
+    document.head.append(script);
+  });
+}
+
+async function ensurePdfLibs() {
+  await loadScript(HTML2CANVAS_SRC);
+  await loadScript(JSPDF_SRC);
+  if (typeof window.html2canvas !== "function" || !window.jspdf?.jsPDF) {
+    throw new Error("PDF 工具載入失敗");
+  }
+}
+
+function ibonHeader() {
+  const unit = currentUnit();
+  const header = document.createElement("header");
+  header.className = "ibon-head";
+  const kicker = document.createElement("p");
+  kicker.className = "kicker";
+  kicker.textContent = "國中數學基本功";
+  const heading = document.createElement("h1");
+  heading.textContent = unit.name;
+  const rule = document.createElement("hr");
+  rule.className = "rule";
+  const meta = document.createElement("p");
+  meta.className = "meta";
+  meta.textContent = `${formatDate(state.date)}　${unit.grade}　第 ${state.variant + 1} 組　空白卷`;
+  const blurb = document.createElement("p");
+  blurb.className = "blurb";
+  blurb.textContent = unit.blurb;
+  const mix = document.createElement("p");
+  mix.className = "mix";
+  mix.textContent = "基礎 2 題、中等 6 題、進階 2 題。只練計算，沒有應用題。";
+  header.append(kicker, heading, rule, meta, blurb, mix);
+  return header;
+}
+
+function ibonRunningHead() {
+  const head = document.createElement("p");
+  head.className = "ibon-run";
+  head.textContent = `${currentUnit().name}　${formatDate(state.date)}　第 ${state.variant + 1} 組　續`;
+  return head;
+}
+
+function ibonFooter(page, total) {
+  const foot = document.createElement("p");
+  foot.className = "ibon-foot";
+  foot.textContent = `國中數學基本功 · 每日十題 · ${page}／${total}`;
+  return foot;
+}
+
+function ibonCard(problem, index) {
+  const card = document.createElement("section");
+  card.className = "card";
+  if (index === 0 || problem.difficulty !== state.problems[index - 1].difficulty) {
+    card.classList.add("group-start");
+  }
+  const top = document.createElement("div");
+  top.className = "card-top";
+  const num = document.createElement("span");
+  num.className = "num";
+  num.textContent = String(index + 1);
+  const diff = document.createElement("span");
+  diff.className = `diff diff-${problem.difficulty}`;
+  diff.textContent = DIFFICULTY_LABEL[problem.difficulty];
+  const prompt = document.createElement("span");
+  prompt.className = "prompt";
+  prompt.textContent = problem.prompt;
+  top.append(num, diff, prompt);
+  const stem = document.createElement("div");
+  stem.className = "stem";
+  typeset(stem, problem.stem, true);
+  const write = document.createElement("div");
+  write.className = "write-line";
+  write.textContent = "答：";
+  card.append(top, stem, write);
+  return card;
+}
+
+function blockHeight(node, gauge) {
+  gauge.append(node);
+  const height = node.offsetHeight;
+  node.remove();
+  return height;
+}
+
+function packIbonPages(heights, headerHeight, runHeight, footerHeight) {
+  const pages = [];
+  let current = [];
+  let used = headerHeight + footerHeight;
+  for (let index = 0; index < heights.length; index += 1) {
+    const height = heights[index];
+    if (current.length && used + height > PDF_PAGE_H) {
+      pages.push(current);
+      current = [];
+      used = runHeight + footerHeight;
+    }
+    current.push(index);
+    used += height;
+  }
+  if (current.length) pages.push(current);
+  return pages;
+}
+
+function buildIbonPages(root) {
+  const gauge = document.createElement("div");
+  gauge.className = "ibon-page";
+  root.append(gauge);
+  const header = ibonHeader();
+  const running = ibonRunningHead();
+  const footer = ibonFooter(1, 1);
+  const cards = state.problems.map((problem, index) => ibonCard(problem, index));
+  const headerHeight = blockHeight(header, gauge);
+  const runHeight = blockHeight(running, gauge);
+  const footerHeight = blockHeight(footer, gauge);
+  const heights = cards.map((card) => blockHeight(card, gauge));
+  gauge.remove();
+  const groups = packIbonPages(heights, headerHeight, runHeight, footerHeight);
+  return groups.map((indexes, pageIndex) => {
+    const page = document.createElement("div");
+    page.className = "ibon-page";
+    page.append(pageIndex === 0 ? header : ibonRunningHead());
+    for (const index of indexes) page.append(cards[index]);
+    page.append(ibonFooter(pageIndex + 1, groups.length));
+    root.append(page);
+    return page;
+  });
+}
+
+function pdfFileName() {
+  return `每日十題-${currentUnit().name}-${state.date}-第${state.variant + 1}組.pdf`;
+}
+
+function offerPdf(blob, name, popupOpened) {
+  revokeIbonUrl();
+  ibonUrl = URL.createObjectURL(blob);
+  const node = document.getElementById("ibon-status");
+  if (node) {
+    node.classList.remove("is-error");
+    const link = document.createElement("a");
+    link.href = ibonUrl;
+    link.download = name;
+    link.textContent = name;
+    const tail = popupOpened
+      ? "。ibon 上傳頁已打開，選這份空白卷上傳。"
+      : "。瀏覽器擋住了新分頁，請改開上方的 ibon 上傳頁。";
+    node.replaceChildren(document.createTextNode("PDF 已下載："), link, document.createTextNode(tail));
+  }
+  const a = document.createElement("a");
+  a.href = ibonUrl;
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  a.remove();
+}
+
+function revokeIbonUrl() {
+  if (!ibonUrl) return;
+  URL.revokeObjectURL(ibonUrl);
+  ibonUrl = "";
+}
+
+async function renderBlankPdf() {
+  await document.fonts.ready;
+  const root = document.createElement("div");
+  root.className = "ibon-root";
+  root.setAttribute("aria-hidden", "true");
+  document.body.append(root);
+  try {
+    const pages = buildIbonPages(root);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: "mm", format: "a4", compress: true });
+    const mmPerPx = 25.4 / 96;
+    for (let index = 0; index < pages.length; index += 1) {
+      const canvas = await window.html2canvas(pages[index], {
+        backgroundColor: "#ffffff",
+        scale: PDF_SCALE,
+        useCORS: true,
+        logging: false,
+        width: pages[index].offsetWidth,
+        height: pages[index].offsetHeight,
+      });
+      if (index) pdf.addPage();
+      let widthMm = PDF_PAGE_W * mmPerPx;
+      let heightMm = (canvas.height / PDF_SCALE) * mmPerPx;
+      const maxHeight = 297 - 28;
+      if (heightMm > maxHeight) {
+        widthMm *= maxHeight / heightMm;
+        heightMm = maxHeight;
+      }
+      const x = (210 - widthMm) / 2;
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", x, 14, widthMm, heightMm);
+    }
+    return pdf.output("blob");
+  } finally {
+    root.remove();
+  }
+}
+
+function saveIbonPdf(trigger) {
+  if (ibonBusy) return;
+  if (!state.problems.length) {
+    setIbonStatus("這組題目組不出來，沒有空白卷可存。", true);
+    return;
+  }
+  ibonBusy = true;
+  const popup = window.open(IBON_URL, "_blank");
+  if (popup) popup.opener = null;
+  trigger.disabled = true;
+  const previous = trigger.textContent;
+  trigger.textContent = "正在做 PDF…";
+  setIbonStatus("正在做空白卷 PDF…");
+  ensurePdfLibs()
+    .then(() => renderBlankPdf())
+    .then((blob) => {
+      offerPdf(blob, pdfFileName(), Boolean(popup));
+    })
+    .catch((error) => {
+      console.error(error);
+      const failedLibs = error && error.message === "PDF 工具載入失敗";
+      setIbonStatus(
+        failedLibs
+          ? "PDF 工具載入失敗。請用「列印題目」，在列印視窗選「儲存為 PDF」，再上傳到 ibon。"
+          : "PDF 沒有做成。請用「列印題目」，在列印視窗選「儲存為 PDF」，再上傳到 ibon。",
+        true,
+      );
+    })
+    .finally(() => {
+      ibonBusy = false;
+      if (trigger.isConnected) {
+        trigger.disabled = false;
+        trigger.textContent = previous;
+      }
+    });
+}
+
 function showFatal(error) {
   loadNote.hidden = true;
   problemsEl.replaceChildren();
@@ -617,6 +912,12 @@ function runSelftest() {
     assert(closed && getComputedStyle(closed.querySelector(".solution")).display !== "none", "print key");
     document.body.classList.remove("print-key");
 
+    const ibonButton = document.querySelector("[data-action='ibon-pdf']");
+    assert(ibonButton?.textContent === "存 PDF，到 7-11 印", "ibon button");
+    const ibonNote = document.querySelector(".ibon-note");
+    assert(ibonNote?.textContent.includes("72 小時"), "ibon note");
+    assert(ibonNote.querySelector("a")?.href.startsWith("https://print.ibon.com.tw/"), "ibon link");
+
     const before = state.problems.map((problem) => problem.stem).join("\n");
     const variantBefore = state.variant;
     document.querySelector("[data-action='reshuffle']").click();
@@ -650,6 +951,7 @@ function runSelftest() {
       "wrongRejected=1",
       "katex=10",
       "print=blank,key",
+      "ibon=1",
       "reshuffle=1",
       "unitSwitch=quad",
       "dateNav=1",
