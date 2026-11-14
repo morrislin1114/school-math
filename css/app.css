@@ -221,79 +221,107 @@ button { cursor: pointer; }
   color: var(--ink-soft);
 }
 
-.ibon-note {
-  margin: 10px 0 0;
-  max-width: 46rem;
-  font-size: 13px;
-  line-height: 1.55;
-  color: var(--ink-soft);
-}
-
-.ibon-note a,
-.ibon-status a { color: var(--seal); }
-
-.ibon-status {
+.pdf-status {
   margin: 4px 0 0;
   font-size: 13px;
 }
 
-.ibon-status:empty { display: none; }
+.pdf-status a { color: var(--seal); }
 
-.ibon-status.is-error { color: var(--bad); }
+.pdf-status:empty { display: none; }
 
-.ibon-root {
+.pdf-status.is-error { color: var(--bad); }
+
+.pdf-root {
   position: fixed;
-  left: -2400px;
+  left: -2600px;
   top: 0;
-  width: 688px;
+  width: 734px;
   background: #fff;
   pointer-events: none;
 }
 
-.ibon-page {
-  width: 688px;
+.pdf-page {
+  width: 734px;
   box-sizing: border-box;
   background: #fff;
   color: var(--ink);
-  font-size: 16px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
-.ibon-page h1 {
-  margin: 6px 0 0;
+.pdf-banner,
+.pdf-run,
+.pdf-foot,
+.pdf-a { display: flow-root; }
+
+.pdf-page h1 {
+  margin: 0;
   font-family: var(--serif);
-  font-size: 34px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
-.ibon-head,
-.ibon-run,
-.ibon-foot { display: flow-root; }
-
-.ibon-page .card { margin: 0; }
-
-.ibon-page .card.group-start { margin-top: 0; padding-top: 28px; }
-
-.ibon-page .stem { overflow: visible; margin: 8px 0 0; }
-
-.ibon-page .write-line { display: flex !important; margin-top: 10px; }
-
-.ibon-run {
-  margin: 0 0 8px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid var(--rule);
+.pdf-meta,
+.pdf-run {
+  margin: 2px 0 6px;
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 12px;
 }
 
-.ibon-foot {
+.pdf-foot {
   margin: 0;
-  padding-top: 16px;
-  font-size: 12px;
+  padding-top: 6px;
+  font-size: 11px;
   color: #666;
 }
+
+.pdf-q {
+  padding: 2px 0 1px;
+  border-top: 1px solid #eadfce;
+}
+
+.pdf-q-top {
+  margin: 0;
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+.pdf-questions .stem { margin: 0; overflow: visible; font-size: 13px; }
+
+.pdf-questions .katex-display { margin: 0; }
+
+.pdf-questions .write-line {
+  display: flex !important;
+  min-height: 16px;
+  margin: 0;
+  font-size: 12px;
+}
+
+.pdf-a {
+  margin: 0;
+  padding: 6px 0 4px;
+  border-top: 1px solid #eadfce;
+}
+
+.pdf-answers .stem { margin: 1px 0 2px; overflow: visible; font-size: 13px; }
+
+.pdf-answer-label {
+  margin: 2px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.pdf-answers .pdf-answer { font-size: 14px; }
+
+.pdf-answers .katex-display { margin: 0.1em 0; }
+
+.pdf-step-text { margin: 2px 0 0; font-size: 12px; }
+
+.pdf-step-math { margin: 0 0 3px; font-size: 13px; }
 
 .scoreline {
   display: flex;
@@ -526,7 +554,7 @@ button { cursor: pointer; }
 @media print {
   body { background: white; }
   .sheet { box-shadow: none; margin: 0; max-width: none; padding: 0; }
-  .no-print, .answer-row, .feedback, .reveal, .rail, .toolbar, .scoreline, .help, .selftest, .load-note, .ibon-root {
+  .no-print, .answer-row, .feedback, .reveal, .rail, .toolbar, .scoreline, .help, .selftest, .load-note, .pdf-root {
     display: none !important;
   }
   .write-line { display: flex; }
@@ -560,8 +588,8 @@ body.print-blank .scoreline,
 body.print-key .scoreline,
 body.print-blank .help,
 body.print-key .help,
-body.print-blank .ibon-root,
-body.print-key .ibon-root {
+body.print-blank .pdf-root,
+body.print-key .pdf-root {
   display: none !important;
 }
 
