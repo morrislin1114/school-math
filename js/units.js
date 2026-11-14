@@ -2010,7 +2010,7 @@ function absUnit() {
 export const UNITS = [
   {
     id: "intfrac",
-    grade: "七上",
+    grade: "國一上",
     name: "整數與分數的四則運算",
     blurb: "括號、次方、負號，還有分數的加減乘除。",
     hint: "整數或最簡分數，例如 -3/4",
@@ -2018,7 +2018,7 @@ export const UNITS = [
   },
   {
     id: "proportion",
-    grade: "七下",
+    grade: "國一下",
     name: "比例式",
     blurb: "內項乘積等於外項乘積，化成一元一次再解。",
     hint: "x 的值，例如 -3/2",
@@ -2026,7 +2026,7 @@ export const UNITS = [
   },
   {
     id: "linear",
-    grade: "七下",
+    grade: "國一下",
     name: "一元一次方程式",
     blurb: "去括號、去分母、移項，解出 x。",
     hint: "x 的值，例如 -3/4",
@@ -2034,7 +2034,7 @@ export const UNITS = [
   },
   {
     id: "ineq",
-    grade: "七下",
+    grade: "國一下",
     name: "一元一次不等式",
     blurb: "移項，遇到負數係數記得把不等號改向。",
     hint: "例如 x ≥ -1/2",
@@ -2042,7 +2042,7 @@ export const UNITS = [
   },
   {
     id: "system",
-    grade: "七下",
+    grade: "國一下",
     name: "二元一次聯立方程式",
     blurb: "加減消去或代入，求出 x 和 y。",
     hint: "先 x 再 y，例如 2, -1",
@@ -2050,7 +2050,7 @@ export const UNITS = [
   },
   {
     id: "poly",
-    grade: "八上",
+    grade: "國二上",
     name: "多項式的運算",
     blurb: "加減時對齊同類項，乘法用分配律展開。",
     hint: "合併後的多項式，例如 2x^2 - 3x + 1",
@@ -2058,7 +2058,7 @@ export const UNITS = [
   },
   {
     id: "formula",
-    grade: "八上",
+    grade: "國二上",
     name: "乘法公式",
     blurb: "平方差、完全平方、立方公式，含數字計算。",
     hint: "展開後的多項式，或算出的數字",
@@ -2066,7 +2066,7 @@ export const UNITS = [
   },
   {
     id: "exp",
-    grade: "八上",
+    grade: "國二上",
     name: "指數律",
     blurb: "同底數乘除、乘方，負指數改寫到分母。",
     hint: "例如 8a^2/b^3",
@@ -2074,7 +2074,7 @@ export const UNITS = [
   },
   {
     id: "sci",
-    grade: "八上",
+    grade: "國二上",
     name: "科學記號",
     blurb: "a×10^n，係數 a 要落在 1 和 10 之間。",
     hint: "例如 3.2×10^5 或 3.2×10^-4",
@@ -2082,7 +2082,7 @@ export const UNITS = [
   },
   {
     id: "surd",
-    grade: "八下",
+    grade: "國二下",
     name: "根式的化簡",
     blurb: "把完全平方提出根號，分數根式一併化簡。",
     hint: "最簡根式，例如 2√3",
@@ -2090,7 +2090,7 @@ export const UNITS = [
   },
   {
     id: "surdop",
-    grade: "八下",
+    grade: "國二下",
     name: "根式的四則運算",
     blurb: "同類根式合併、展開，分母要有理化。",
     hint: "例如 2√3 - 1",
@@ -2098,7 +2098,7 @@ export const UNITS = [
   },
   {
     id: "factor",
-    grade: "八下",
+    grade: "國二下",
     name: "因式分解",
     blurb: "提公因式、公式、十字交乘。",
     hint: "例如 (2x-1)(x+3) 或 3(x-2)^2",
@@ -2106,7 +2106,7 @@ export const UNITS = [
   },
   {
     id: "rational",
-    grade: "八下",
+    grade: "國二下",
     name: "分式的運算",
     blurb: "約分、通分、分式乘除，寫成最簡分式。",
     hint: "例如 (x-1)/(x+2)",
@@ -2114,7 +2114,7 @@ export const UNITS = [
   },
   {
     id: "quad",
-    grade: "八下",
+    grade: "國二下",
     name: "一元二次方程式",
     blurb: "因式分解或公式解。重根寫一次，開平方要正負。",
     hint: "由小到大，例如 -2, 3；根式可寫 (1+√5)/2",
@@ -2122,7 +2122,7 @@ export const UNITS = [
   },
   {
     id: "abs",
-    grade: "九上",
+    grade: "國三上",
     name: "絕對值",
     blurb: "絕對值方程式，含兩邊都有絕對值、以及距離和。",
     hint: "例如 -1, 4；區間寫 1 ≤ x ≤ 5；沒有解寫無解",
